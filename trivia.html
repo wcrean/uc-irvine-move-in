@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Anteater Trivia</title><link rel="stylesheet" href="styles.css"></head><body><main class="wrap"><a class="back" href="index.html">← UC Irvine Move-in</a><div class="page-head"><div class="eyebrow">Zot!</div><h1>Anteater Trivia 🐜</h1><p>UCI + Irvine edition</p></div><div id="quiz"></div><div class="footer">Sources: UCI, UCI Libraries and City of Irvine official sites.</div></main><script>
+const qs=[
+['What year did UC Irvine open for classes?',['1959','1965','1971','1978'],1,'UCI opened for classes in 1965.'],
+['Which U.S. president dedicated the UCI campus?',['John F. Kennedy','Lyndon B. Johnson','Richard Nixon','Gerald Ford'],1,'Lyndon B. Johnson dedicated the campus in 1964.'],
+['What comic strip helped inspire UCI’s Anteater mascot?',['Peanuts','B.C.','Garfield','Doonesbury'],1,'Johnny Hart’s B.C. helped inspire the Anteater.'],
+['What is UCI’s famous cheer?',['Go Blue!','Zot!','Eater Up!','Rip ’Em!'],1,'Zot!'],
+['About how far is UCI from the Pacific coast?',['2 miles','5 miles','12 miles','20 miles'],1,'UCI says the campus is about five miles from the Pacific coast.'],
+['When was the City of Irvine incorporated?',['1965','1969','1971','1976'],2,'Irvine incorporated on December 28, 1971.'],
+['Roughly how large is the City of Irvine?',['25 sq mi','45 sq mi','65+ sq mi','100+ sq mi'],2,'The city covers more than 65 square miles.'],
+['How many students were enrolled on UCI’s first day?',['589','1,589','5,189','15,890'],1,'UCI Libraries lists 1,589 students on opening day.'],
+['What animal is Peter?',['Aardvark','Anteater','Armadillo','Tapir'],1,'Peter is, of course, an Anteater.'],
+['What sits at the center of the UCI campus?',['Aldrich Park','Anteater Stadium','Founders Lake','Pacific Quad'],0,'Aldrich Park is the green heart of the campus.']];
+const root=document.getElementById('quiz');let n=0,score=0;
+function show(){if(n>=qs.length){root.innerHTML=`<section class="question"><h2>You got ${score} of ${qs.length}!</h2><p>${score>=8?'Zot! You’re ready for move-in. 🐜':'Not bad — another lap around Ring Road and you’ll have it.'}</p><button class="answer-btn" onclick="n=0;score=0;show()">Play again</button></section>`;return}const q=qs[n];root.innerHTML=`<section class="question"><div class="eyebrow" style="color:#0064a4">Question ${n+1} of ${qs.length}</div><h2>${q[0]}</h2>${q[1].map((x,i)=>`<button class="answer-btn" onclick="pick(${i})">${x}</button>`).join('')}<div id="fb" class="feedback"></div></section>`}
+function pick(i){const q=qs[n];if(i===q[2])score++;document.querySelectorAll('.answer-btn').forEach(b=>b.disabled=true);document.getElementById('fb').innerHTML=(i===q[2]?'✅ Correct. ':'❌ '+q[1][q[2]]+'. ')+q[3]+`<br><button class="button" onclick="n++;show()">Next →</button>`}show();
+</script></body></html>
