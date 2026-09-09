@@ -1,6 +1,185 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Weather</title><link rel="stylesheet" href="styles.css"></head><body><main class="wrap"><a class="back" href="index.html">← UC Irvine Move-in</a><div class="page-head"><div class="eyebrow">September 18–23</div><h1>Weather ☀️</h1></div>
-<section class="info weather-feature"><span class="badge">FORECAST COMING SOON</span><h2>Newport Beach & Irvine</h2><p>The trip is still outside the most reliable forecast window. We'll update this page with the actual day-by-day forecast once Sept. 18–23 is within range.</p></section>
-<section class="info"><h2>What to Expect</h2><p>September in coastal Orange County is typically warm and dry, with comfortable mornings and evenings and warmer afternoons inland around Irvine.</p><div class="weather-grid"><div><strong>☀️ Daytime</strong><br>Plan for sun and warm afternoons.</div><div><strong>🌊 Coast</strong><br>Newport Beach can feel cooler than inland Irvine.</div><div><strong>🌙 Evening</strong><br>A light layer can be useful after sunset.</div><div><strong>📦 Move-In</strong><br>Comfortable shoes, water and sun protection.</div></div></section>
-<section class="info"><h2>What to Pack for the Weather</h2><p>Short sleeves, shorts or lightweight pants, sneakers, sunglasses, sunscreen, a hat and a light sweater or jacket for evenings and air-conditioned spaces.</p></section>
-<section class="info"><h2>Saturday in Los Angeles</h2><p>Because Saturday takes us from LAX toward Northridge, we'll also check the LA / San Fernando Valley forecast. It can be noticeably warmer there than at the Newport Beach hotel.</p></section>
-<a class="back bottom-back" href="index.html">← UC Irvine Move-in</a></main></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Weather</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .live-weather-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+    .weather-status{font-size:.9rem;opacity:.78;margin:.35rem 0 0}
+    .weather-refresh{border:0;border-radius:999px;padding:.65rem .9rem;background:#f5c400;color:#102a43;font-weight:700;cursor:pointer}
+    .weather-refresh:disabled{opacity:.55;cursor:default}
+    .forecast-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7rem;margin-top:1rem}
+    .forecast-day{background:rgba(255,255,255,.9);border:1px solid rgba(0,60,113,.14);border-radius:16px;padding:.9rem .65rem;text-align:center;box-shadow:0 5px 16px rgba(0,0,0,.06)}
+    .forecast-day.trip-day{outline:3px solid #f5c400;outline-offset:1px;background:#fffdf3}
+    .forecast-date{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#31566f}
+    .forecast-icon{font-size:2rem;line-height:1.2;margin:.35rem 0}
+    .forecast-condition{font-size:.83rem;min-height:2.2em;color:#334e68}
+    .forecast-temps{font-size:1rem;margin-top:.35rem}
+    .forecast-rain{font-size:.78rem;color:#526d82;margin-top:.2rem}
+    .trip-tag{display:inline-block;margin-top:.45rem;padding:.18rem .4rem;border-radius:999px;background:#f5c400;color:#102a43;font-size:.68rem;font-weight:800}
+    .weather-error{padding:1rem;border-radius:14px;background:#fff3f3;color:#7d1d1d}
+    .forecast-note{margin-top:.85rem;font-size:.86rem;opacity:.78}
+    .northridge-card{display:grid;grid-template-columns:auto 1fr;gap:.85rem;align-items:center}
+    .northridge-icon{font-size:2.4rem}
+    @media(max-width:800px){.forecast-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:430px){.forecast-strip{grid-template-columns:1fr 1fr}.forecast-day{padding:.8rem .5rem}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="index.html">← UC Irvine Move-in</a>
+  <div class="page-head">
+    <div class="eyebrow">September 18–23</div>
+    <h1>Weather ☀️</h1>
+  </div>
+
+  <section class="info weather-feature">
+    <div class="live-weather-header">
+      <div>
+        <span class="badge">LIVE FORECAST</span>
+        <h2>Newport Beach & Irvine</h2>
+        <p>Automatically updated 10-day forecast for our Orange County home base.</p>
+        <p id="weather-status" class="weather-status">Loading the latest forecast…</p>
+      </div>
+      <button id="refresh-weather" class="weather-refresh" type="button">Refresh</button>
+    </div>
+    <div id="forecast" class="forecast-strip" aria-live="polite"></div>
+    <p class="forecast-note">Trip dates are highlighted in gold as they enter the 10-day forecast window. Forecast data: Open-Meteo.</p>
+  </section>
+
+  <section class="info">
+    <h2>Saturday in Northridge</h2>
+    <div id="northridge-forecast" class="northridge-card">
+      <div class="northridge-icon">🌴</div>
+      <div>Loading the Sept. 19 forecast for the Harmons / SMU-watch area…</div>
+    </div>
+    <p class="forecast-note">The San Fernando Valley can be noticeably warmer than Newport Beach, so this is worth checking before we head toward LAX and Northridge.</p>
+  </section>
+
+  <section class="info">
+    <h2>Move-In Weather</h2>
+    <p id="movein-weather">As Sunday, Sept. 20 enters the forecast window, its live forecast will appear above. Plan on comfortable shoes, water, sunscreen and a hat for unloading at Mesa Court and Oso Tower.</p>
+  </section>
+
+  <section class="info">
+    <h2>What to Pack for the Weather</h2>
+    <p>Short sleeves, shorts or lightweight pants, sneakers, sunglasses, sunscreen, a hat and a light sweater or jacket for cooler coastal evenings and air-conditioned spaces.</p>
+  </section>
+
+  <a class="back bottom-back" href="index.html">← UC Irvine Move-in</a>
+</main>
+<script>
+(() => {
+  const tripStart = '2026-09-18';
+  const tripEnd = '2026-09-23';
+  const moveInDate = '2026-09-20';
+  const northridgeDate = '2026-09-19';
+  const forecastEl = document.getElementById('forecast');
+  const statusEl = document.getElementById('weather-status');
+  const refreshButton = document.getElementById('refresh-weather');
+  const northridgeEl = document.getElementById('northridge-forecast');
+  const moveInEl = document.getElementById('movein-weather');
+
+  const weatherCodes = {
+    0:['☀️','Clear'],1:['🌤️','Mostly clear'],2:['⛅','Partly cloudy'],3:['☁️','Overcast'],
+    45:['🌫️','Fog'],48:['🌫️','Fog'],51:['🌦️','Light drizzle'],53:['🌦️','Drizzle'],55:['🌧️','Heavy drizzle'],
+    61:['🌦️','Light rain'],63:['🌧️','Rain'],65:['🌧️','Heavy rain'],66:['🌧️','Freezing rain'],67:['🌧️','Freezing rain'],
+    71:['🌨️','Light snow'],73:['🌨️','Snow'],75:['❄️','Heavy snow'],77:['🌨️','Snow grains'],
+    80:['🌦️','Rain showers'],81:['🌧️','Rain showers'],82:['⛈️','Heavy showers'],85:['🌨️','Snow showers'],86:['🌨️','Heavy snow showers'],
+    95:['⛈️','Thunderstorms'],96:['⛈️','Thunderstorms'],99:['⛈️','Strong thunderstorms']
+  };
+
+  function fmtDate(iso){
+    const d = new Date(iso + 'T12:00:00');
+    return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  }
+
+  function isTripDay(iso){ return iso >= tripStart && iso <= tripEnd; }
+
+  function dailyRows(data){
+    return data.daily.time.map((date,i) => ({
+      date,
+      code:data.daily.weather_code[i],
+      high:Math.round(data.daily.temperature_2m_max[i]),
+      low:Math.round(data.daily.temperature_2m_min[i]),
+      rain:Math.round(data.daily.precipitation_probability_max[i] ?? 0)
+    }));
+  }
+
+  function weatherText(code){ return weatherCodes[code] || ['🌤️','Mixed conditions']; }
+
+  function renderMain(rows){
+    forecastEl.innerHTML = rows.map(row => {
+      const [icon,label] = weatherText(row.code);
+      return `<div class="forecast-day${isTripDay(row.date)?' trip-day':''}">
+        <div class="forecast-date">${fmtDate(row.date)}</div>
+        <div class="forecast-icon" aria-hidden="true">${icon}</div>
+        <div class="forecast-condition">${label}</div>
+        <div class="forecast-temps"><strong>${row.high}°</strong> / ${row.low}°</div>
+        <div class="forecast-rain">Rain ${row.rain}%</div>
+        ${isTripDay(row.date)?'<span class="trip-tag">TRIP DAY</span>':''}
+      </div>`;
+    }).join('');
+
+    const move = rows.find(r => r.date === moveInDate);
+    if(move){
+      const [icon,label] = weatherText(move.code);
+      moveInEl.innerHTML = `${icon} <strong>Sunday, Sept. 20:</strong> ${label}, high around <strong>${move.high}°</strong>, low around ${move.low}°, with about <strong>${move.rain}%</strong> precipitation probability. Check again the morning of move-in for the freshest conditions.`;
+    }
+  }
+
+  function renderNorthridge(rows){
+    const sat = rows.find(r => r.date === northridgeDate);
+    if(!sat){
+      northridgeEl.innerHTML = '<div class="northridge-icon">🌴</div><div>Sept. 19 is not yet in the available live forecast window. This will fill in automatically as the date gets closer.</div>';
+      return;
+    }
+    const [icon,label] = weatherText(sat.code);
+    northridgeEl.innerHTML = `<div class="northridge-icon">${icon}</div><div><strong>Saturday, Sept. 19:</strong> ${label}. High around <strong>${sat.high}°</strong>, low around ${sat.low}°, rain chance about ${sat.rain}%.</div>`;
+  }
+
+  async function fetchForecast(lat,lon,days=10){
+    const params = new URLSearchParams({
+      latitude:lat,
+      longitude:lon,
+      daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      temperature_unit:'fahrenheit',
+      timezone:'America/Los_Angeles',
+      forecast_days:String(days)
+    });
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if(!res.ok) throw new Error('Weather service returned ' + res.status);
+    return res.json();
+  }
+
+  async function loadWeather(){
+    refreshButton.disabled = true;
+    statusEl.textContent = 'Loading the latest forecast…';
+    try{
+      const [orangeCounty,northridge] = await Promise.all([
+        fetchForecast('33.6174','-117.8891',10),
+        fetchForecast('34.2381','-118.5301',10)
+      ]);
+      renderMain(dailyRows(orangeCounty));
+      renderNorthridge(dailyRows(northridge));
+      const now = new Date();
+      statusEl.textContent = 'Updated ' + now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + ' • Pacific-area forecast';
+    } catch(err){
+      console.error(err);
+      forecastEl.innerHTML = '<div class="weather-error">The live forecast could not load right now. Check your connection and tap Refresh.</div>';
+      northridgeEl.innerHTML = '<div class="northridge-icon">🌴</div><div>Live Northridge forecast temporarily unavailable.</div>';
+      statusEl.textContent = 'Live forecast temporarily unavailable.';
+    } finally {
+      refreshButton.disabled = false;
+    }
+  }
+
+  refreshButton.addEventListener('click',loadWeather);
+  loadWeather();
+  setInterval(loadWeather, 30 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
